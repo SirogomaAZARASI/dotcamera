@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>レトロドット変換</title>
+<title>Dot Camera</title>
 <style>
   body {
     margin:0;
@@ -61,12 +61,12 @@
 </head>
 <body>
 <header>
-  <h1>レトロ ドット変換</h1>
+  <h1>Dot Camera</h1>
 </header>
 
 <div class="panel">
   <input type="file" id="file" accept="image/*">
-  <label>ドット数 <input id="dotSize" type="number" value="100" min="4"></label>
+  <label>ドット数 <input id="dotSize" type="number" value="100" min="4" max="1024"></label>
   <label>色数 <input id="colorCount" type="number" value="8" min="1"></label>
   <select id="mode">
     <option value="preset">プリセット</option>
@@ -76,7 +76,10 @@
   <select id="preset">
     <option value="sunset2">Sunset</option>
     <option value="mono8">モノクロ</option>
-    <option value="gb8">古いゲーム風風</option>
+    <option value="gb8">古いゲーム風</option>
+    <option value="dusty5">くすみカラー</option>
+    <option value="vivid5">ビビッド</option>
+    <option value="pop5">ポップ</option>
   </select>
   <button id="convert">変換</button>
   <button id="realtime">リアルタイム開始</button>
@@ -86,7 +89,7 @@
 </div>
 
 <div class="palette-io">
-  <textarea id="paletteText" placeholder="例: 255.000.000,000.000.255,000.255.000"></textarea>
+  <textarea id="paletteText" placeholder="例: 255.000.000,000.000.255,000.255.000,128.128.128"></textarea>
   <button id="loadColors">色読み込み</button>
 </div>
 
@@ -108,7 +111,10 @@ const PRESETS = {
     [189,141,101],[211,158,108],[255,192,118],[204,206,185]
   ],
   mono8: [[0,0,0],[64,64,64],[128,128,128],[192,192,192],[255,255,255]],
-  gb8: [[15,56,15],[48,98,48],[139,172,15],[155,188,15],[220,240,140],[255,255,255]]
+  gb8: [[15,56,15],[48,98,48],[139,172,15],[155,188,15],[220,240,140],[255,255,255]],
+  dusty5: [[37,40,61],[111,146,131],[166,117,161],[206,162,172],[239,217,206]],
+  vivid5: [[41,47,54],[78,205,196],[252,171,16],[255,107,107],[255,255,255]],
+  pop5: [[29,47,111],[131,144,250],[250,199,72],[249,233,236],[36,130,50]]
 };
 
 const fileInput = document.getElementById('file');
@@ -280,22 +286,13 @@ realtimeBtn.onclick=async()=>{
 };
 switchCamBtn.onclick=async()=>{ useFront=!useFront; if(realtimeOn) await startCamera(); };
 
-saveBtn.onclick=()=>{
-  const scale = 12;
-  const exportCanvas = document.createElement('canvas');
-  exportCanvas.width = canvas.width * scale;
-  exportCanvas.height = canvas.height * scale;
-  const ectx = exportCanvas.getContext('2d');
-
-  ectx.imageSmoothingEnabled = false;
-  ectx.drawImage(canvas, 0, 0, exportCanvas.width, exportCanvas.height);
-
-  const u = exportCanvas.toDataURL('image/png');
-  const a = document.createElement('a');
-  a.href = u;
-  a.download = 'retro.png';
+saveBtn.onclick=()=>canvas.toBlob(b=>{
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u; a.download='retro.png';
   a.click();
-};
+  URL.revokeObjectURL(u);
+});
 </script>
 </body>
 </html>
