@@ -66,7 +66,7 @@
 
 <div class="panel">
   <input type="file" id="file" accept="image/*">
-  <label>ドット数 <input id="dotSize" type="number" value="100" min="4" max="1024"></label>
+  <label>ドット数 <input id="dotSize" type="number" value="100" min="4"></label>
   <label>色数 <input id="colorCount" type="number" value="8" min="1"></label>
   <select id="mode">
     <option value="preset">プリセット</option>
@@ -74,9 +74,9 @@
     <option value="custom">手動</option>
   </select>
   <select id="preset">
-    <option value="sunset2">Sunset 2</option>
+    <option value="sunset2">Sunset</option>
     <option value="mono8">モノクロ</option>
-    <option value="gb8">古いゲーム風</option>
+    <option value="gb8">古いゲーム風風</option>
   </select>
   <button id="convert">変換</button>
   <button id="realtime">リアルタイム開始</button>
@@ -86,7 +86,7 @@
 </div>
 
 <div class="palette-io">
-  <textarea id="paletteText" placeholder="例: 255.000.000,000.000.255,000.255.000,128.128.128"></textarea>
+  <textarea id="paletteText" placeholder="例: 255.000.000,000.000.255,000.255.000"></textarea>
   <button id="loadColors">色読み込み</button>
 </div>
 
@@ -102,8 +102,6 @@
 </footer>
 
 <script>
-/* ここから下のJSは前と同じ（省略せずこのまま使ってOK） */
-
 const PRESETS = {
   sunset2: [
     [44,62,76],[66,75,82],[109,102,94],[163,132,104],
@@ -231,7 +229,6 @@ modeSelect.onchange=updatePaletteUI;
 colorCountInput.onchange=updatePaletteUI;
 updatePaletteUI();
 
-// 色読み込み
 loadColorsBtn.onclick = () => {
   const text = paletteText.value.trim();
   if(!text) return alert('色コードを入力してください');
@@ -247,22 +244,17 @@ loadColorsBtn.onclick = () => {
     buildPaletteEditorFromRGB(parts);
     drawFromImage();
   }catch(e){
-    alert('形式が正しくありません。\n例: 255.000.000,000.000.255');
+    alert('形式が正しくありません');
   }
 };
 
-// 色保存
 saveColorsBtn.onclick = async () => {
   const pal = getActivePalette();
   const text = pal.map(p =>
     `${String(p[0]).padStart(3,'0')}.${String(p[1]).padStart(3,'0')}.${String(p[2]).padStart(3,'0')}`
   ).join(',');
-  try{
-    await navigator.clipboard.writeText(text);
-    alert('コピーしました:\n' + text);
-  }catch(e){
-    alert('クリップボードにコピーできませんでした');
-  }
+  await navigator.clipboard.writeText(text);
+  alert('コピーしました');
 };
 
 async function startCamera(){
@@ -288,13 +280,22 @@ realtimeBtn.onclick=async()=>{
 };
 switchCamBtn.onclick=async()=>{ useFront=!useFront; if(realtimeOn) await startCamera(); };
 
-saveBtn.onclick=()=>canvas.toBlob(b=>{
-  const u=URL.createObjectURL(b);
-  const a=document.createElement('a');
-  a.href=u; a.download='retro.png';
+saveBtn.onclick=()=>{
+  const scale = 12;
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = canvas.width * scale;
+  exportCanvas.height = canvas.height * scale;
+  const ectx = exportCanvas.getContext('2d');
+
+  ectx.imageSmoothingEnabled = false;
+  ectx.drawImage(canvas, 0, 0, exportCanvas.width, exportCanvas.height);
+
+  const u = exportCanvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = u;
+  a.download = 'retro.png';
   a.click();
-  URL.revokeObjectURL(u);
-});
+};
 </script>
 </body>
 </html>
