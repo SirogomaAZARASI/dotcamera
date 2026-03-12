@@ -3,7 +3,6 @@
 ![Static Badge](https://img.shields.io/badge/HTML5-orange?logo=Html5)
 ![Static Badge](https://img.shields.io/badge/JavaScript-yellow?logo=JavaScript)
 ![Static Badge](https://img.shields.io/badge/CSS-red?logo=CSS)
-![Static Badge](https://img.shields.io/badge/Markdown-blue?logo=Markdown)
 # dotcamera
 カメラからのリアルタイムの映像や写真ライブラリの写真を
 ドットに変えるhtmlコードです。
