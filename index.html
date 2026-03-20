@@ -96,6 +96,9 @@
   <button id="switchCam">フロント/リア切替</button>
   <button id="save">保存</button>
   <button id="saveColors">色保存</button>
+	<select id="savedPalettes"></select>
+	<button id="savePalette">パレット保存</button>
+	<button id="deletePalette">削除</button>
 </div>
 
 <div class="palette-io">
@@ -325,6 +328,76 @@ saveBtn.onclick=()=>{
   a.download = 'retro.png';
   a.click();
 };
+
+// ===== パレット保存機能　=====
+
+const savedSelect = document.getElementById('savedPalettes');
+const savePaletteBtn = document.getElementById('savePalette');
+const deletePaletteBtn = document.getElementById('deletePalette');
+
+function getSavedPalettes(){
+  return JSON.parse(localStorage.getItem('palettes') || '[]');
+}
+
+function setSavedPalettes(arr){
+  localStorage.setItem('palettes', JSON.stringify(arr));
+}
+
+function updateSavedUI(){
+  const list = getSavedPalettes();
+  savedSelect.innerHTML = '<option value="">保存済みパレット</option>';
+  list.forEach((p,i)=>{
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = p.name || `Palette ${i+1}`;
+    savedSelect.appendChild(opt);
+  });
+}
+
+// 保存（最大50）
+savePaletteBtn.onclick = ()=>{
+  const pal = getActivePalette();
+  if(!pal.length) return;
+
+  const name = prompt('パレット名を入力');
+  if(!name) return;
+
+  let list = getSavedPalettes();
+  list.push({ name, colors: pal });
+
+  if(list.length > 50) list.shift();
+
+  setSavedPalettes(list);
+  updateSavedUI();
+};
+
+// 読み込み
+savedSelect.onchange = ()=>{
+  const i = savedSelect.value;
+  if(i==="") return;
+
+  const data = getSavedPalettes()[i];
+const pal = data.colors || data;
+  colorCountInput.value = pal.length;
+  modeSelect.value = 'custom';
+  fixedRandomPalette = null;
+  buildPaletteEditorFromRGB(pal);
+  drawFromImage();
+};
+
+// 削除
+deletePaletteBtn.onclick = ()=>{
+  const i = savedSelect.value;
+  if(i==="") return;
+
+  let list = getSavedPalettes();
+  list.splice(i,1);
+  setSavedPalettes(list);
+  updateSavedUI();
+};
+
+updateSavedUI();
+
 </script>
 </body>
 </html>
